@@ -1,6 +1,6 @@
-import { ShippingOption } from '@bigcommerce/checkout-sdk';
-import React, { FunctionComponent, memo, useCallback } from 'react';
-
+import { Cart,ShippingOption, Consignment, RequestOptions, CheckoutParams, CheckoutSelectors } from '@bigcommerce/checkout-sdk';
+import React, { FunctionComponent, memo, useCallback, useState, useEffect } from 'react'; //add memo 
+import { CheckoutContextProps, withCheckout } from '../../checkout';
 import { EMPTY_ARRAY } from '../../common/utility';
 import { Checklist, ChecklistItem } from '../../ui/form';
 import { LoadingOverlay } from '../../ui/loading';
@@ -11,7 +11,6 @@ interface ShippingOptionListItemProps {
     consignmentId: string;
     shippingOption: ShippingOption;
 }
-
 const ShippingOptionListItem: FunctionComponent<ShippingOptionListItemProps> = ({
     consignmentId,
     shippingOption,
@@ -24,7 +23,7 @@ const ShippingOptionListItem: FunctionComponent<ShippingOptionListItemProps> = (
         ),
         [shippingOption],
     );
-
+    
     return (
         <ChecklistItem
             htmlId={`shippingOptionRadio-${consignmentId}-${shippingOption.id}`}
@@ -33,6 +32,8 @@ const ShippingOptionListItem: FunctionComponent<ShippingOptionListItemProps> = (
         />
     );
 };
+
+
 
 export interface ShippingOptionListProps {
     consignmentId: string;
@@ -43,13 +44,22 @@ export interface ShippingOptionListProps {
     onSelectedOption(consignmentId: string, shippingOptionId: string): void;
 }
 
-const ShippingOptionsList: FunctionComponent<ShippingOptionListProps> = ({
+
+export interface WithCheckoutShippingProps {
+    cart: Cart;
+    consignments: Consignment[];
+    loadCheckout(id: any, options?: RequestOptions<CheckoutParams>): Promise<CheckoutSelectors>;
+}
+
+const ShippingOptionsList: FunctionComponent<ShippingOptionListProps & WithCheckoutShippingProps> = ({
     consignmentId,
     inputName,
     isLoading,
     shippingOptions = EMPTY_ARRAY,
     selectedShippingOptionId,
-    onSelectedOption,
+    cart,
+    loadCheckout,
+    onSelectedOption
 }) => {
     const handleSelect = useCallback(
         (value: string) => {
@@ -62,6 +72,41 @@ const ShippingOptionsList: FunctionComponent<ShippingOptionListProps> = ({
         return null;
     }
 
+    const [data, setData] = useState(shippingOptions);
+
+    const FREE_COST = data.filter(item => item.cost === 0); //Free Shipping filter items..
+    const SHPPING_COST = data.filter(item => item.cost > 1); //Paied Shipping filter items..
+
+    const putShippingCost = (method: string) => {
+        const options = {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                "shippingOptionId": method
+            })
+        };
+        fetch(`/api/storefront/checkouts/${cart.id}/consignments/${consignmentId}`, options)
+            .then(response => response.json())
+            .then(response => {
+                console.log(response);
+                loadCheckout(cart.id);
+            })
+            .catch(err => console.error(err));
+    }
+
+
+    useEffect(() => {
+        // 배송비 이상일때.....
+        if (cart.cartAmount >= 10000) {
+            setData(FREE_COST);
+            putShippingCost(FREE_COST[0].id);
+        }
+        // 배송비 미만일때......
+        if (cart.cartAmount < 10000) {
+            putShippingCost(SHPPING_COST[0].id);
+        }
+    }, [])
+
     return (
         <LoadingOverlay isLoading={isLoading}>
             <Checklist
@@ -70,7 +115,7 @@ const ShippingOptionsList: FunctionComponent<ShippingOptionListProps> = ({
                 name={inputName}
                 onSelect={handleSelect}
             >
-                {shippingOptions.map((shippingOption) => (
+                {data.map((shippingOption) => (
                     <ShippingOptionListItem
                         consignmentId={consignmentId}
                         key={shippingOption.id}
@@ -82,4 +127,34 @@ const ShippingOptionsList: FunctionComponent<ShippingOptionListProps> = ({
     );
 };
 
-export default memo(ShippingOptionsList);
+
+
+export function mapToDonationProps({
+    checkoutService,
+    checkoutState,
+}: CheckoutContextProps): WithCheckoutShippingProps | null {
+    const {
+        data: {
+            getCart,
+            getCheckout,
+            getConsignments
+        }
+    } = checkoutState;
+
+    const checkout = getCheckout();
+    const cart = getCart();
+    const consignments = getConsignments() || [];
+
+    if (!checkout || !cart) {
+        return null;
+    }
+
+    return {
+        cart,
+        consignments,
+        loadCheckout: checkoutService.loadCheckout
+    };
+}
+
+export default memo(withCheckout(mapToDonationProps)(ShippingOptionsList));
+

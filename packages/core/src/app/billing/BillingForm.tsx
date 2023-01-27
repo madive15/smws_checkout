@@ -40,6 +40,7 @@ export interface BillingFormProps {
     methodId?: string;
     shouldShowOrderComments: boolean;
     useFloatingLabel?: boolean;
+    hasDigitalItems:any;
     getFields(countryCode?: string): FormField[];
     onSubmit(values: BillingFormValues): void;
     onUnhandledError(error: Error): void;
@@ -70,7 +71,8 @@ class BillingForm extends PureComponent<
             countries,
             isUpdating,
             setFieldValue,
-            shouldShowOrderComments,
+            // shouldShowOrderComments,
+            hasDigitalItems,
             values,
             methodId,
             useFloatingLabel,
@@ -132,7 +134,7 @@ class BillingForm extends PureComponent<
                     )}
                 </Fieldset>
 
-                {shouldShowOrderComments && <OrderComments />}
+                {hasDigitalItems < 0 && <OrderComments />}
 
                 <div className="form-actions">
                     <Button

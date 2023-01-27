@@ -2,6 +2,22 @@
 // LOADING INDICATORS
 // =============================================================================
 
+.loadingNotification {
+    background-color: rgba(000, 000, 000, 0.7);
+    height: 100%;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+
+    &.checkoutDim {
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        transform: none;
+    }
+}
+
 .loadingNotification-label {
     align-items: center;
     display: flex;

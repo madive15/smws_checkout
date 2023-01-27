@@ -16,7 +16,6 @@ import {
 import classNames from 'classnames';
 import { find, findIndex } from 'lodash';
 import React, { Component, lazy, ReactNode } from 'react';
-
 import { StaticBillingAddress } from '../billing';
 import { EmptyCartMessage } from '../cart';
 import { CustomError, ErrorLogger, ErrorModal, isCustomError } from '../common/error';
@@ -41,6 +40,7 @@ import CheckoutStepType from './CheckoutStepType';
 import CheckoutSupport from './CheckoutSupport';
 import mapToCheckoutProps from './mapToCheckoutProps';
 import navigateToOrderConfirmation from './navigateToOrderConfirmation';
+import RedierctCart from './RedierctCart';
 import withCheckout from './withCheckout';
 
 const Billing = lazy(() =>
@@ -150,6 +150,7 @@ export interface WithCheckoutProps {
     subscribeToConsignments(subscriber: (state: CheckoutSelectors) => void): () => void;
 }
 
+
 class Checkout extends Component<
     CheckoutProps & WithCheckoutProps & WithLanguageProps,
     CheckoutState
@@ -184,6 +185,7 @@ class Checkout extends Component<
             createBodlService,
             createEmbeddedMessenger,
             embeddedStylesheet,
+            isPending,
             loadCheckout,
             subscribeToConsignments,
         } = this.props;
@@ -262,6 +264,11 @@ class Checkout extends Component<
                 this.handleUnhandledError(error);
             }
         }
+        if (isPending) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'none';
+        }
     }
 
     render(): ReactNode {
@@ -293,12 +300,19 @@ class Checkout extends Component<
     }
 
     private renderContent(): ReactNode {
-        const { isPending, loginUrl, promotions = [], steps } = this.props;
+        const { isPending, loginUrl, promotions = [], steps, cart } = this.props;
 
         const { activeStepType, defaultStepType, isCartEmpty, isRedirecting } = this.state;
 
         if (isCartEmpty) {
             return <EmptyCartMessage loginUrl={loginUrl} waitInterval={3000} />;
+        }
+
+        if (cart?.lineItems.digitalItems && cart.lineItems.digitalItems.length >= 1
+            &&
+            cart?.lineItems.physicalItems && cart.lineItems.physicalItems.length >= 1
+        ) {
+            return <RedierctCart />
         }
 
         return (
@@ -603,7 +617,7 @@ class Checkout extends Component<
             prevHasSelectedShippingOptions &&
             !newHasSelectedShippingOptions &&
             findIndex(steps, { type: CheckoutStepType.Shipping }) <
-                findIndex(steps, { type: activeStepType })
+            findIndex(steps, { type: activeStepType })
         ) {
             this.navigateToStep(CheckoutStepType.Shipping);
             this.setState({ error: new ShippingOptionExpiredError() });

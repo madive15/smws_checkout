@@ -133,6 +133,21 @@ class OrderConfirmation extends Component<
             links: { siteLink },
         } = config;
 
+        const MEMBERSHIP_URL = "https://yamato.madive.co.kr",
+              cartItem = order.lineItems.digitalItems,
+              cartItem2 = order.lineItems.physicalItems,
+              filterItem = cartItem.find(item => item.sku.includes('Member-')),
+              filterItem2 = cartItem2.find(item => item.sku.includes('Member-'));
+
+        if (filterItem || filterItem2) {
+
+            console.log(`${MEMBERSHIP_URL}/api/order/membershipUpdate.json?membershipId=${order.customerId}-${order.orderId}`);
+
+            fetch(`${MEMBERSHIP_URL}/api/order/membershipUpdate.json?membershipId=${order.customerId}-${order.orderId}`)
+                .then(res => { console.log(res) })
+        }
+
+
         return (
             <div
                 className={classNames('layout optimizedCheckout-contentPrimary', {
@@ -141,7 +156,7 @@ class OrderConfirmation extends Component<
             >
                 <div className="layout-main">
                     <div className="orderConfirmation">
-                        <ThankYouHeader name={order.billingAddress.firstName} />
+                        <ThankYouHeader name={`${order.billingAddress.lastName} ${order.billingAddress.firstName}`} />
 
                         <OrderStatus
                             order={order}

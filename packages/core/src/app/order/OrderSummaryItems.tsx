@@ -1,6 +1,6 @@
 import { LineItemMap } from '@bigcommerce/checkout-sdk';
 import React, { ReactNode } from 'react';
-
+import { findIndex } from 'lodash';
 import { TranslatedString } from '../locale';
 import { IconChevronDown, IconChevronUp } from '../ui/icon';
 
@@ -10,6 +10,7 @@ import mapFromDigital from './mapFromDigital';
 import mapFromGiftCertificate from './mapFromGiftCertificate';
 import mapFromPhysical from './mapFromPhysical';
 import OrderSummaryItem from './OrderSummaryItem';
+
 
 const COLLAPSED_ITEMS_LIMIT = 4;
 
@@ -21,6 +22,7 @@ interface OrderSummaryItemsState {
     isExpanded: boolean;
 }
 
+
 class OrderSummaryItems extends React.Component<OrderSummaryItemsProps, OrderSummaryItemsState> {
     constructor(props: OrderSummaryItemsProps) {
         super(props);
@@ -30,9 +32,14 @@ class OrderSummaryItems extends React.Component<OrderSummaryItemsProps, OrderSum
         };
     }
 
+    
     render(): ReactNode {
         const { items } = this.props;
         const { isExpanded } = this.state;
+        const index = findIndex(items!.physicalItems!, { sku: 'COD1' });
+        const index2 = findIndex(items!.physicalItems!, { sku: 'COD2' });
+        const index3 = findIndex(items!.physicalItems!, { sku: 'COD3' });
+        const index4 = findIndex(items!.physicalItems!, { sku: 'COD4' });
 
         return (
             <>
@@ -41,7 +48,20 @@ class OrderSummaryItems extends React.Component<OrderSummaryItemsProps, OrderSum
                     data-test="cart-count-total"
                 >
                     <TranslatedString
-                        data={{ count: getItemsCount(items) }}
+                             data={ { 
+                                count: 
+                                index > -1 ? getItemsCount(items) - items!.physicalItems[index]!.quantity 
+                                :(index2 > -1 ?
+                                    getItemsCount(items) - items!.physicalItems[index2]!.quantity     
+                                    :
+                                    index3 > -1 ?
+                                    getItemsCount(items) - items!.physicalItems[index3]!.quantity   
+                                    :
+                                    index4 > -1 ?
+                                    getItemsCount(items) - items!.physicalItems[index4]!.quantity   
+                                    : getItemsCount(items) 
+                                )
+                                 } }
                         id="cart.item_count_text"
                     />
                 </h3>
@@ -51,6 +71,9 @@ class OrderSummaryItems extends React.Component<OrderSummaryItemsProps, OrderSum
                         ...items.physicalItems
                             .slice()
                             .sort((item) => item.variantId)
+                            // .filter(item => item.sku !== 'COD1')
+                            // sku값중 cod 라는 문자열 포함시 모든 필터처리
+                            .filter(item => !item.sku.includes('COD'))
                             .map(mapFromPhysical),
                         ...items.giftCertificates.slice().map(mapFromGiftCertificate),
                         ...items.digitalItems

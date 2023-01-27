@@ -37,6 +37,7 @@ export interface WithCheckoutBillingProps {
     shouldShowOrderComments: boolean;
     billingAddress?: Address;
     methodId?: string;
+    hasDigitalItems:any;
     useFloatingLabel?: boolean;
     getFields(countryCode?: string): FormField[];
     initialize(): Promise<CheckoutSelectors>;
@@ -166,6 +167,7 @@ function mapToBillingProps({
         updateAddress: checkoutService.updateBillingAddress,
         updateCheckout: checkoutService.updateCheckout,
         useFloatingLabel: isFloatingLabelEnabled(config.checkoutSettings),
+        hasDigitalItems: cart.lineItems.digitalItems.length
     };
 }
 

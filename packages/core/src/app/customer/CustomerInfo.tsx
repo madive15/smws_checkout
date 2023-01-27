@@ -1,12 +1,10 @@
 import { CheckoutSelectors, CustomerRequestOptions, CustomError } from '@bigcommerce/checkout-sdk';
 import { noop } from 'lodash';
 import React, { FunctionComponent } from 'react';
-
 import { CheckoutContextProps, withCheckout } from '../checkout';
 import { isErrorWithType } from '../common/error';
 import { TranslatedString } from '../locale';
 import { Button, ButtonSize, ButtonVariant } from '../ui/button';
-
 import canSignOut, { isSupportedSignoutMethod } from './canSignOut';
 
 export interface CustomerInfoProps {
@@ -23,6 +21,8 @@ interface WithCheckoutCustomerInfoProps {
     methodId: string;
     isSignedIn: boolean;
     isSigningOut: boolean;
+    firstName:string;
+    lastName:string;
     signOut(options?: CustomerRequestOptions): Promise<CheckoutSelectors>;
 }
 
@@ -31,6 +31,8 @@ const CustomerInfo: FunctionComponent<CustomerInfoProps & WithCheckoutCustomerIn
     methodId,
     isSignedIn,
     isSigningOut,
+    lastName,
+    firstName,
     onSignOut = noop,
     onSignOutError = noop,
     signOut,
@@ -61,6 +63,7 @@ const CustomerInfo: FunctionComponent<CustomerInfoProps & WithCheckoutCustomerIn
                 data-test="customer-info"
             >
                 {email}
+                <div>{lastName}{firstName}</div>
             </div>
 
             <div className="customerView-actions">
@@ -105,6 +108,8 @@ function mapToWithCheckoutCustomerInfoProps({
         methodId,
         isSignedIn: canSignOut(customer, checkout, methodId),
         isSigningOut: isSigningOut(),
+        firstName: customer.firstName,
+        lastName:customer.lastName,
         signOut: checkoutService.signOutCustomer,
     };
 }

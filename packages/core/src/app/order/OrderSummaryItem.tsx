@@ -37,7 +37,7 @@ const OrderSummaryItem: FunctionComponent<OrderSummaryItemProps> = ({
                 className="product-title optimizedCheckout-contentPrimary"
                 data-test="cart-item-product-title"
             >
-                {`${quantity} x ${name}`}
+                {`${name} x ${quantity}`}
             </h4>
             {productOptions && productOptions.length > 0 && (
                 <ul
