@@ -95,6 +95,7 @@ const OrderSummarySubtotals: FunctionComponent<OrderSummarySubtotalsProps> = ({
                     code={coupon.code}
                     key={index}
                     label={displayCouponName(coupon)}
+                    couponType={coupon.couponType}
                     onRemoved={onRemovedCoupon}
                     testId="cart-coupon"
                 />

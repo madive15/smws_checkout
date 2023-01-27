@@ -45,7 +45,7 @@ const OrderSummaryDiscount: FunctionComponent<OrderSummaryDiscountProps & WithCh
 
     return (
         <>
-            <Modal isOpen={modal} shouldShowCloseButton>
+            <Modal isOpen={modal}>
                 <ModalContents
                     clickable={closeModal}
                     modalText="既に、送料が無料なので、別のクーポンを選択してください。"
