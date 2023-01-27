@@ -10,6 +10,7 @@ import getUniquePaymentMethodId, { parseUniquePaymentMethodId } from './getUniqu
 import PaymentMethodTitle from './PaymentMethodTitle';
 import PaymentMethodV2 from './PaymentMethodV2';
 import { Modal } from '../../ui/modal';
+import ModalContents from '../../ui/modal/ModalContents';
 
 
 
@@ -68,10 +69,10 @@ const PaymentMethodList: FunctionComponent<
         const index2 = findIndex(cart!.lineItems.physicalItems, { sku: "COD2" });
         const index3 = findIndex(cart!.lineItems.physicalItems, { sku: "COD3" });
         const index4 = findIndex(cart!.lineItems.physicalItems, { sku: "COD4" });
-        
+
         const cartId = cart.id;
         const itemAmount = cart.baseAmount;
-    
+
         const _updateShippingCostTotal = () => {
             return new Promise(async (resolve, reject) => {
                 const arrConsignments = consignments.map(consignment => {
@@ -112,7 +113,7 @@ const PaymentMethodList: FunctionComponent<
         const closeModal = () => { setModal(false); }
 
         // COD FEE product function
-        const addProduct = (productIndex: any, codType:number) => {
+        const addProduct = (productIndex: any, codType: number) => {
             if (values.paymentProviderRadio === 'cod' && productIndex === -1 || productIndex === null || productIndex === undefined) {
                 setModal(true);
                 fetch(`/cart.php?action=add&sku=COD${codType}&qty=1`).then(res => {
@@ -161,26 +162,22 @@ const PaymentMethodList: FunctionComponent<
             }
         }
 
-        useEffect(()=>{
-            {itemAmount < 10000 && addProduct(index,1)};
-            {itemAmount >= 10000 && itemAmount < 30000 && addProduct(index2,2)};
-            {itemAmount >= 30000 && itemAmount < 100000 && addProduct(index3,3)};
-            {itemAmount >= 100000 && itemAmount < 300000 && addProduct(index4,4)};
-        },[values.paymentProviderRadio])
+        useEffect(() => {
+            { itemAmount < 10000 && addProduct(index, 1) };
+            { itemAmount >= 10000 && itemAmount < 30000 && addProduct(index2, 2) };
+            { itemAmount >= 30000 && itemAmount < 100000 && addProduct(index3, 3) };
+            { itemAmount >= 100000 && itemAmount < 300000 && addProduct(index4, 4) };
+        }, [values.paymentProviderRadio])
 
         return (
             <>
                 <Modal isOpen={modal}>
-                    <div className="btn-wrap" style={{ display: "flex", flexDirection: "column" }}>
-                        <p style={{ textAlign: "center", fontSize: "20px" }}>代金引換でお支払いする際、手数料が追加されます。</p>
-                        <button
-                            type='button'
-                            className='button button--small'
-                            onClick={closeModal}>
-                            <span>確認</span>
-                        </button>
-                    </div>
+                    <ModalContents
+                        clickable={closeModal}
+                        modalText="代金引換でお支払いする際、手数料が追加されます。"
+                    />
                 </Modal>
+
                 <Checklist
                     defaultSelectedItemId={values.paymentProviderRadio}
                     isDisabled={isInitializingPayment}
