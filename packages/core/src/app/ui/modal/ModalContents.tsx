@@ -1,11 +1,11 @@
 import React from 'react';
 
-interface IClick {
+interface IModalContentsProps {
   clickable:any
   modalText:string
 }
 
-const ModalContents = ({clickable,modalText}:IClick) => {
+const ModalContents = ({clickable,modalText}:IModalContentsProps) => {
 
   return (
     <div className="btn-wrap" style={{ display: "flex", flexDirection: "column" }}>

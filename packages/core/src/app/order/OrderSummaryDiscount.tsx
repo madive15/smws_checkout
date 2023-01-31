@@ -31,7 +31,7 @@ const OrderSummaryDiscount: FunctionComponent<OrderSummaryDiscountProps & WithCh
     ...rest
 }) => {
 
-    const [modal, setModal] = useState(false);
+    const [modal, setModal] = useState<boolean>(false);
     const closeModal = () => {
         onRemoved && onRemoved(code);
         setModal(false);
