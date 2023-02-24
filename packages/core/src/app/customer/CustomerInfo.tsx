@@ -63,7 +63,7 @@ const CustomerInfo: FunctionComponent<CustomerInfoProps & WithCheckoutCustomerIn
                 data-test="customer-info"
             >
                 {email}
-                <div>{lastName}{firstName}</div>
+                <div>{firstName} {lastName}</div>
             </div>
 
             <div className="customerView-actions">

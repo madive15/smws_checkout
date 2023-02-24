@@ -30,19 +30,19 @@ export interface AddressFormProps {
     setFieldValue?(fieldName: string, value: string | string[]): void;
 }
 
-const LABEL: AddressKeyMap = {
-    address1: 'address.address_line_1_label',
-    address2: 'address.address_line_2_label',
-    city: 'address.city_label',
-    company: 'address.company_name_label',
-    countryCode: 'address.country_label',
-    firstName: 'address.first_name_label',
-    lastName: 'address.last_name_label',
-    phone: 'address.phone_number_label',
-    postalCode: 'address.postal_code_label',
-    stateOrProvince: 'address.state_label',
-    stateOrProvinceCode: 'address.state_label',
-};
+// const LABEL: AddressKeyMap = {
+//     address1: 'address.address_line_1_label',
+//     address2: 'address.address_line_2_label',
+//     city: 'address.city_label',
+//     company: 'address.company_name_label',
+//     countryCode: 'address.country_label',
+//     firstName: 'address.first_name_label',
+//     lastName: 'address.last_name_label',
+//     phone: 'address.phone_number_label',
+//     postalCode: 'address.postal_code_label',
+//     stateOrProvince: 'address.state_label',
+//     stateOrProvinceCode: 'address.state_label',
+// };
 
 const AUTOCOMPLETE: AddressKeyMap = {
     address1: 'address-line1',
@@ -94,6 +94,8 @@ class AddressForm extends Component<AddressFormProps & WithLanguageProps> {
             shouldShowSaveAddress,
             useFloatingLabel,
         } = this.props;
+        
+        console.log(formFields);
 
         return (
             <>
@@ -131,20 +133,14 @@ class AddressForm extends Component<AddressFormProps & WithLanguageProps> {
                             return (
                                 <DynamicFormField
                                     autocomplete={AUTOCOMPLETE[field.name]}
-                                    extraClass={`dynamic-form-field--${getAddressFormFieldLegacyName(
+                                    extraClass={` dynamic-form-field--${getAddressFormFieldLegacyName(
                                         addressFieldName,
                                     )}`}
                                     field={field}
                                     inputId={getAddressFormFieldInputId(addressFieldName)}
                                     // stateOrProvince can sometimes be a dropdown or input, so relying on id is not sufficient
                                     key={`${field.id}-${field.name}`}
-                                    label={
-                                        field.custom ? (
-                                            field.label
-                                        ) : (
-                                            <TranslatedString id={LABEL[field.name]} />
-                                        )
-                                    }
+                                    label={field.label}
                                     onChange={this.handleDynamicFormFieldChange(addressFieldName)}
                                     parentFieldName={
                                         field.custom
@@ -217,6 +213,7 @@ class AddressForm extends Component<AddressFormProps & WithLanguageProps> {
         value,
     ) => {
         const { formFields, setFieldValue = noop, onChange = noop } = this.props;
+
 
         const dateFormFieldNames = formFields
             .filter((field) => field.custom && field.fieldType === DynamicFormFieldType.date)
