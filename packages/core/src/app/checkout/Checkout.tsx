@@ -185,7 +185,6 @@ class Checkout extends Component<
             createBodlService,
             createEmbeddedMessenger,
             embeddedStylesheet,
-            isPending,
             loadCheckout,
             subscribeToConsignments,
         } = this.props;
@@ -263,11 +262,6 @@ class Checkout extends Component<
             if (error instanceof Error) {
                 this.handleUnhandledError(error);
             }
-        }
-        if (isPending) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'none';
         }
     }
 

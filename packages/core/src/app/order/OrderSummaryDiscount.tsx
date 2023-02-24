@@ -38,7 +38,8 @@ const OrderSummaryDiscount: FunctionComponent<OrderSummaryDiscountProps & WithCh
     }
 
     useEffect(() => {
-        if (consignments.some(item => item.shippingCost === 0) && couponType === 'free_shipping') {
+        const opiton = consignments.some(item => item.shippingCost === 0) && couponType === 'free_shipping';
+        if (opiton) {
             setModal(true);
         }
     }, [])

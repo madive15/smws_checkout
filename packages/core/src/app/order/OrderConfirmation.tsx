@@ -134,10 +134,10 @@ class OrderConfirmation extends Component<
         } = config;
 
         const MEMBERSHIP_URL = "https://yamato.madive.co.kr",
-              cartItem = order.lineItems.digitalItems,
-              cartItem2 = order.lineItems.physicalItems,
-              filterItem = cartItem.find(item => item.sku.includes('Member-')),
-              filterItem2 = cartItem2.find(item => item.sku.includes('Member-'));
+            cartItem = order.lineItems.digitalItems,
+            cartItem2 = order.lineItems.physicalItems,
+            filterItem = cartItem.find(item => item.sku.includes('Member-')),
+            filterItem2 = cartItem2.find(item => item.sku.includes('Member-'));
 
         if (filterItem || filterItem2) {
 
@@ -156,7 +156,7 @@ class OrderConfirmation extends Component<
             >
                 <div className="layout-main">
                     <div className="orderConfirmation">
-                        <ThankYouHeader name={`${order.billingAddress.lastName} ${order.billingAddress.firstName}`} />
+                        <ThankYouHeader name={`${order.billingAddress.firstName} ${order.billingAddress.lastName}`} />
 
                         <OrderStatus
                             order={order}
@@ -190,6 +190,7 @@ class OrderConfirmation extends Component<
                         </div>
                     </div>
                 </div>
+
 
                 {this.renderOrderSummary()}
                 {this.renderErrorModal()}

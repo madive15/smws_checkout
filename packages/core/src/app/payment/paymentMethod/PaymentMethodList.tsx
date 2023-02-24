@@ -108,13 +108,16 @@ const PaymentMethodList: FunctionComponent<
             })
         }
 
-        // control modal 
+        // Control modal 
         const [modal, setModal] = useState<boolean>(false)
         const closeModal = () => { setModal(false); }
 
         // COD FEE product function
         const addProduct = (productIndex: any, codType: number) => {
-            if (values.paymentProviderRadio === 'cod' && productIndex === -1 || productIndex === null || productIndex === undefined) {
+            const isCODSelected = values.paymentProviderRadio === 'cod';
+            const noCODProduct = productIndex === -1 || productIndex === null || productIndex === undefined;
+
+            if (isCODSelected && noCODProduct) {
                 setModal(true);
                 fetch(`/cart.php?action=add&sku=COD${codType}&qty=1`).then(res => {
                     console.log(res);
@@ -131,11 +134,11 @@ const PaymentMethodList: FunctionComponent<
                     })
                 })
             }
-            if (productIndex === -1 || productIndex === undefined || productIndex === null) {
+            if (noCODProduct) {
                 return;
             }
-            // Remove COD FEE pruduct
-            if (values.paymentProviderRadio !== 'cod') {
+            // Remove COD FEE product
+            if (!isCODSelected) {
                 const cartId = cart.id;
                 const itemId = cart.lineItems.physicalItems[productIndex].id!;
                 fetch(`/api/storefront/carts/${cartId}/items/${itemId}`, {
@@ -162,12 +165,32 @@ const PaymentMethodList: FunctionComponent<
             }
         }
 
+        const addCODbyAmount = (amount: number) => {
+
+            const COD_PRICE_BY_AMOUNT_CONDITION1 = 10_000;
+            const COD_PRICE_BY_AMOUNT_CONDITION2 = 30_000;
+            const COD_PRICE_BY_AMOUNT_CONDITION3 = 100_000;
+            const COD_PRICE_BY_AMOUNT_CONDITION4 = 300_000;
+
+            switch (true) {
+                case amount < COD_PRICE_BY_AMOUNT_CONDITION1:
+                    addProduct(index, 1)
+                    break;
+                case amount >= COD_PRICE_BY_AMOUNT_CONDITION1 && amount < COD_PRICE_BY_AMOUNT_CONDITION2:
+                    addProduct(index2, 2)
+                    break;
+                case amount >= COD_PRICE_BY_AMOUNT_CONDITION2 && amount < COD_PRICE_BY_AMOUNT_CONDITION3:
+                    addProduct(index3, 4)
+                    break;
+                case amount >= COD_PRICE_BY_AMOUNT_CONDITION3 && amount < COD_PRICE_BY_AMOUNT_CONDITION4:
+                    addProduct(index4, 4)
+                    break;
+            }
+        }
+
         useEffect(() => {
-            { itemAmount < 10000 && addProduct(index, 1) };
-            { itemAmount >= 10000 && itemAmount < 30000 && addProduct(index2, 2) };
-            { itemAmount >= 30000 && itemAmount < 100000 && addProduct(index3, 3) };
-            { itemAmount >= 100000 && itemAmount < 300000 && addProduct(index4, 4) };
-        }, [values.paymentProviderRadio])
+            addCODbyAmount(itemAmount)
+        }, [itemAmount, values.paymentProviderRadio])
 
         return (
             <>

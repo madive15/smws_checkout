@@ -4,7 +4,6 @@ import { CheckoutContextProps, withCheckout } from '../../checkout';
 import { EMPTY_ARRAY } from '../../common/utility';
 import { Checklist, ChecklistItem } from '../../ui/form';
 import { LoadingOverlay } from '../../ui/loading';
-
 import StaticShippingOption from './StaticShippingOption';
 
 interface ShippingOptionListItemProps {
@@ -96,13 +95,14 @@ const ShippingOptionsList: FunctionComponent<ShippingOptionListProps & WithCheck
 
 
     useEffect(() => {
-        // 배송비 이상일때.....
-        if (cart.cartAmount >= 10000) {
+        const SHIPPING_CONDITION_AMOUNT = 10_000
+        // 배송비 이상일때
+        if (cart.cartAmount >= SHIPPING_CONDITION_AMOUNT) {
             setData(FREE_COST);
             putShippingCost(FREE_COST[0].id);
         }
-        // 배송비 미만일때......
-        if (cart.cartAmount < 10000) {
+        // 배송비 미만일때
+        if (cart.cartAmount < SHIPPING_CONDITION_AMOUNT) {
             putShippingCost(SHPPING_COST[0].id);
         }
     }, [])
