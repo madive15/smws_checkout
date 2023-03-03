@@ -26,7 +26,7 @@ const StoreCreditField: FunctionComponent<StoreCreditFieldProps & WithCurrencyPr
     const labelContent = useMemo(
         () => (
             <>
-                <TranslatedString id="redeemable.apply_store_credit_before_action" />{' '}
+                {/* <TranslatedString id="redeemable.apply_store_credit_before_action" />{' '} */}
                 <TooltipTrigger
                     placement="top-start"
                     tooltip={
