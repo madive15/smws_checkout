@@ -113,56 +113,47 @@ const PaymentMethodList: FunctionComponent<
         const closeModal = () => { setModal(false); }
 
         // COD FEE product function
-        const addProduct = (productIndex: any, codType: number) => {
+        async function addProduct(productIndex: number, codType: number) {
+            const hasPhysicalItems = cart.lineItems.physicalItems.length >= 1;
+            const noDigitalItem = cart.lineItems.digitalItems.length === 0;
             const isCODSelected = values.paymentProviderRadio === 'cod';
-            const noCODProduct = productIndex === -1 || productIndex === null || productIndex === undefined;
+            const hasNoProduct = productIndex === -1 || productIndex === null || productIndex === undefined;
 
-            if (isCODSelected && noCODProduct) {
-                setModal(true);
-                fetch(`/cart.php?action=add&sku=COD${codType}&qty=1`).then(res => {
-                    console.log(res);
-                    _updateShippingCostTotal().then(data => {
-                        console.log(data);
-                        loadCheckout(cartId, {
-                            params: {
-                                include: [
-                                    'cart.lineItems.physicalItems.categoryNames',
-                                    'cart.lineItems.digitalItems.categoryNames',
-                                ] as any,
-                            },
-                        });
-                    })
-                })
-            }
-            if (noCODProduct) {
+            if (isCODSelected && hasPhysicalItems && noDigitalItem && hasNoProduct) {
+                try {
+                    setModal(true);
+                    const res = await fetch(`/cart.php?action=add&sku=COD${codType}&qty=1`);
+                    console.log("==================" + res.status) + "==================";
+                    const data = await _updateShippingCostTotal();
+                    console.log(data);
+                    loadCheckout(cartId);
+
+                } catch (error) {
+                    console.error(error);
+                }
+
+            } else if (!isCODSelected) {
+                const itemId = cart.lineItems.physicalItems[productIndex].id;
+                console.log(itemId);
+                try {
+                    const response = await fetch(`/api/storefront/carts/${cart.id}/items/${itemId}`, {
+                        method: 'DELETE',
+                        credentials: 'same-origin',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    console.log(response);
+                    const data = await _updateShippingCostTotal();
+                    console.log(data);
+                    loadCheckout(cart.id);
+                } catch (error) {
+                    console.error(error);
+                }
+            } else if (hasNoProduct) {
                 return;
             }
-            // Remove COD FEE product
-            if (!isCODSelected) {
-                const cartId = cart.id;
-                const itemId = cart.lineItems.physicalItems[productIndex].id!;
-                fetch(`/api/storefront/carts/${cartId}/items/${itemId}`, {
-                    method: "DELETE",
-                    credentials: "same-origin",
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                })
-                    .then(response => {
-                        console.log(response);
-                        _updateShippingCostTotal().then(data => {
-                            console.log(data);
-                            loadCheckout(cartId, {
-                                params: {
-                                    include: [
-                                        'cart.lineItems.physicalItems.categoryNames',
-                                        'cart.lineItems.digitalItems.categoryNames',
-                                    ] as any,
-                                },
-                            });
-                        })
-                    })
-            }
+            console.log("COD SELECTED================="+isCODSelected);
         }
 
         const addCODbyAmount = (amount: number) => {
@@ -180,7 +171,7 @@ const PaymentMethodList: FunctionComponent<
                     addProduct(index2, 2)
                     break;
                 case amount >= COD_PRICE_BY_AMOUNT_CONDITION2 && amount < COD_PRICE_BY_AMOUNT_CONDITION3:
-                    addProduct(index3, 4)
+                    addProduct(index3, 3)
                     break;
                 case amount >= COD_PRICE_BY_AMOUNT_CONDITION3 && amount < COD_PRICE_BY_AMOUNT_CONDITION4:
                     addProduct(index4, 4)
