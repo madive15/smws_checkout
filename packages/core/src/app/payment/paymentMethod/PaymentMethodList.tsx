@@ -9,8 +9,8 @@ import { findIndex } from 'lodash';
 import getUniquePaymentMethodId, { parseUniquePaymentMethodId } from './getUniquePaymentMethodId';
 import PaymentMethodTitle from './PaymentMethodTitle';
 import PaymentMethodV2 from './PaymentMethodV2';
-import { Modal } from '../../ui/modal';
-import ModalContents from '../../ui/modal/ModalContents';
+import ModalManagement from '../../ui/modal/ModalMangement';
+import { LoadingOverlay } from '../../ui/loading';
 
 
 
@@ -109,24 +109,27 @@ const PaymentMethodList: FunctionComponent<
         }
 
         // Control modal 
-        const [modal, setModal] = useState<boolean>(false)
-        const closeModal = () => { setModal(false); }
+        const [modal, setModal] = useState<boolean>(false);
+        const [loading, setLoading] = useState<boolean>(false);
+        const closeModal = () => { setModal(false); };
 
         // COD FEE product function
         async function addProduct(productIndex: number, codType: number) {
-            const hasPhysicalItems = cart.lineItems.physicalItems.length >= 1;
+            const hasPhysicalItems = cart.lineItems.physicalItems.length;
             const noDigitalItem = cart.lineItems.digitalItems.length === 0;
             const isCODSelected = values.paymentProviderRadio === 'cod';
             const hasNoProduct = productIndex === -1 || productIndex === null || productIndex === undefined;
 
             if (isCODSelected && hasPhysicalItems && noDigitalItem && hasNoProduct) {
                 try {
+                    setLoading(true);
                     setModal(true);
                     const res = await fetch(`/cart.php?action=add&sku=COD${codType}&qty=1`);
                     console.log("==================" + res.status) + "==================";
                     const data = await _updateShippingCostTotal();
                     console.log(data);
                     loadCheckout(cartId);
+                    setLoading(false);
 
                 } catch (error) {
                     console.error(error);
@@ -136,6 +139,7 @@ const PaymentMethodList: FunctionComponent<
                 const itemId = cart.lineItems.physicalItems[productIndex].id;
                 console.log(itemId);
                 try {
+                    setLoading(true);
                     const response = await fetch(`/api/storefront/carts/${cart.id}/items/${itemId}`, {
                         method: 'DELETE',
                         credentials: 'same-origin',
@@ -147,13 +151,14 @@ const PaymentMethodList: FunctionComponent<
                     const data = await _updateShippingCostTotal();
                     console.log(data);
                     loadCheckout(cart.id);
+                    setLoading(false);
                 } catch (error) {
                     console.error(error);
                 }
             } else if (hasNoProduct) {
                 return;
             }
-            console.log("COD SELECTED================="+isCODSelected);
+            console.log("COD SELECTED=================" + isCODSelected);
         }
 
         const addCODbyAmount = (amount: number) => {
@@ -185,44 +190,44 @@ const PaymentMethodList: FunctionComponent<
 
         return (
             <>
-                <Modal isOpen={modal}>
-                    <ModalContents
-                        clickable={closeModal}
-                        modalText="代金引換でお支払いする際、手数料が追加されます。"
-                    />
-                </Modal>
+                <ModalManagement
+                    modal={modal}
+                    text='代金引換でお支払いする際、440円の手数料が追加されます。'
+                    closeModal={closeModal} />
 
-                <Checklist
-                    defaultSelectedItemId={values.paymentProviderRadio}
-                    isDisabled={isInitializingPayment}
-                    name="paymentProviderRadio"
-                    onSelect={handleSelect}
-                >
-                    {methods.map((method) => {
-                        const value = getUniquePaymentMethodId(method.id, method.gateway);
-                        const showOnlyOnMobileDevices = get(
-                            method,
-                            'initializationData.showOnlyOnMobileDevices',
-                            false,
-                        );
+                <LoadingOverlay isLoading={loading}>
+                    <Checklist
+                        defaultSelectedItemId={values.paymentProviderRadio}
+                        isDisabled={isInitializingPayment}
+                        name="paymentProviderRadio"
+                        onSelect={handleSelect}
+                    >
+                        {methods.map((method) => {
+                            const value = getUniquePaymentMethodId(method.id, method.gateway);
+                            const showOnlyOnMobileDevices = get(
+                                method,
+                                'initializationData.showOnlyOnMobileDevices',
+                                false,
+                            );
 
-                        if (showOnlyOnMobileDevices && !isMobile()) {
-                            return;
-                        }
+                            if (showOnlyOnMobileDevices && !isMobile()) {
+                                return;
+                            }
 
-                        return (
-                            <PaymentMethodListItem
-                                isDisabled={isInitializingPayment}
-                                isEmbedded={isEmbedded}
-                                isUsingMultiShipping={isUsingMultiShipping}
-                                key={value}
-                                method={method}
-                                onUnhandledError={onUnhandledError}
-                                value={value}
-                            />
-                        );
-                    })}
-                </Checklist>
+                            return (
+                                <PaymentMethodListItem
+                                    isDisabled={isInitializingPayment}
+                                    isEmbedded={isEmbedded}
+                                    isUsingMultiShipping={isUsingMultiShipping}
+                                    key={value}
+                                    method={method}
+                                    onUnhandledError={onUnhandledError}
+                                    value={value}
+                                />
+                            );
+                        })}
+                    </Checklist>
+                </LoadingOverlay>
             </>
 
         );
